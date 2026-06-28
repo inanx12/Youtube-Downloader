@@ -1,0 +1,35 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# App-specific — indirilen dosyalar ve artıklar
+downloads/
+*.mp4
+*.mp3
+*.webm
+*.m4a
+*.part
+*.ytdl
+
+# Cookie / oturum — KESİNLİKLE sızmamalı
+cookies.txt
+*.cookies
+cookies_*.txt
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+*.env
+
+#md
+sum.md

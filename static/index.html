@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #0f0f1a;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 640px;
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 1.5rem;
+            color: #4cc9f0;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus { border-color: #4cc9f0; }
+        input[type="text"]::placeholder { color: #6a6a8a; }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #4cc9f0;
+            color: #0f0f1a;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        button:hover:not(:disabled) { background: #3db8e0; }
+        button:active:not(:disabled) { transform: scale(0.98); }
+        button:disabled {
+            background: #2a2a40;
+            color: #6a6a8a;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #2a2a40;
+            color: #e0e0e0;
+        }
+        .btn-secondary:hover:not(:disabled) { background: #3a3a50; }
+
+        #videoInfo {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #thumbnail {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #0f0f1a;
+        }
+        #thumbnail img { width: 100%; display: block; }
+
+        #title { font-size: 1.1rem; color: #fff; margin-bottom: 4px; }
+        #meta { font-size: 0.85rem; color: #8a8aa8; }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        select {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            font-size: 1rem;
+            outline: none;
+            cursor: pointer;
+        }
+        select:focus { border-color: #4cc9f0; }
+
+        #progress { margin-bottom: 20px; }
+
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: #0f0f1a;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #2a2a40;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4cc9f0, #3a86ff);
+            border-radius: 12px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #8a8aa8;
+        }
+
+        #processing {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: #8a8aa8;
+            margin-top: 8px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #2a2a40;
+            border-top-color: #4cc9f0;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #result {
+            text-align: center;
+            padding: 16px;
+            background: #0f0f1a;
+            border-radius: 12px;
+            border: 1px solid #2a2a40;
+        }
+
+        #error {
+            padding: 14px 16px;
+            background: #2a0a0a;
+            border: 1px solid #5a1a1a;
+            border-radius: 10px;
+            color: #ff6b6b;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+        }
+
+        /* ── Playlist list ── */
+        #playlistInfo {
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        #playlistInfo h2 {
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        #playlistInfo p {
+            font-size: 0.85rem;
+            color: #8a8aa8;
+        }
+
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            color: #8a8aa8;
+        }
+
+        .playlist-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            background: #0f0f1a;
+            margin-bottom: 16px;
+        }
+
+        .playlist-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-bottom: 1px solid #1f1f30;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .playlist-row:last-child { border-bottom: none; }
+        .playlist-row:hover { background: #1a1a2e; }
+
+        .playlist-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            accent-color: #4cc9f0;
+            cursor: pointer;
+        }
+
+        .playlist-row img {
+            width: 80px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+            background: #1a1a2e;
+        }
+
+        .playlist-row .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .playlist-row .info .row-title {
+            font-size: 0.9rem;
+            color: #e0e0e0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .playlist-row .info .row-duration {
+            font-size: 0.75rem;
+            color: #6a6a8a;
+            margin-top: 2px;
+        }
+
+        /* ── Summary / per-video links ── */
+        .summary {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .summary h3 {
+            font-size: 1rem;
+            color: #4cc9f0;
+            margin-bottom: 8px;
+        }
+        .summary p { font-size: 0.9rem; color: #e0e0e0; margin-bottom: 4px; }
+        .summary .failures {
+            font-size: 0.85rem;
+            color: #ff6b6b;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #2a0a0a;
+            border-radius: 8px;
+        }
+
+        .video-links {
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            background: #0f0f1a;
+            margin-bottom: 16px;
+        }
+        .video-link-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-bottom: 1px solid #1f1f30;
+            font-size: 0.85rem;
+            color: #e0e0e0;
+        }
+        .video-link-row:last-child { border-bottom: none; }
+        .video-link-row button {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 480px) {
+            .container { padding: 20px; }
+            .input-group { flex-direction: column; }
+            #controls { flex-direction: column; }
+            select, button { width: 100%; }
+            .playlist-row img { width: 60px; height: 34px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Downloader</h1>
+
+        <div class="input-group">
+            <input type="text" id="url" placeholder="Paste YouTube URL here…" autocomplete="off">
+            <button id="fetchBtn">Fetch Formats</button>
+        </div>
+
+        <div id="error" class="hidden"></div>
+
+        <!-- Single video info -->
+        <div id="videoInfo" class="hidden">
+            <div id="thumbnail"></div>
+            <h2 id="title"></h2>
+            <div id="meta"></div>
+        </div>
+
+        <!-- Playlist info -->
+        <div id="playlistInfo" class="hidden">
+            <h2 id="playlistTitle"></h2>
+            <p id="playlistMeta"></p>
+        </div>
+
+        <!-- Controls (single video or playlist) -->
+        <div id="controls" class="hidden">
+            <select id="resolution">
+                <option value="">Select resolution…</option>
+            </select>
+            <button id="downloadBtn" disabled>Download</button>
+        </div>
+
+        <!-- Playlist list -->
+        <div id="playlistControls" class="hidden">
+            <div class="playlist-header">
+                <label><input type="checkbox" id="selectAll"> Select all</label>
+                <span id="selectedCount">0 selected</span>
+            </div>
+            <div class="playlist-list" id="playlistList"></div>
+            <button id="downloadSelectedBtn" disabled>Download Selected</button>
+        </div>
+
+        <!-- Progress -->
+        <div id="progress" class="hidden">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-info" id="progressInfo"></div>
+            <div id="processing" class="hidden">
+                <div class="spinner"></div>
+                <span>Processing… (converting / merging)</span>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="result" class="hidden">
+            <button id="downloadFileBtn">Download File</button>
+            <div id="playlistSummary" class="hidden summary"></div>
+            <div id="videoLinks" class="hidden video-links"></div>
+            <button id="downloadZipBtn" class="hidden">Download All (ZIP)</button>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
