@@ -29,25 +29,33 @@ entirely on your own machine (localhost).
 ## 🚀 Quick Start (Windows)
 
 1. **Install prerequisites:**
+```
+   winget install Gyan.FFmpeg
+   winget install DenoLand.Deno
+```
+2. **First time only:** double-click `setup.bat` (creates the venv, installs deps).
+3. **Every time:** double-click `run.bat` — the browser opens automatically to `http://127.0.0.1:8000`.
+
+> Closing the terminal window stops the app.
+
+## 📸 Screenshot
+
+![App screenshot](docs/screenshot.png)
+
+## 📁 Project Structure
+
+```
 .
-
 ├── setup.bat           # First-time setup (Windows)
-
 ├── run.bat             # One-click launcher (Windows)
-
 ├── requirements.txt    # Python dependencies
-
 ├── main.py             # FastAPI backend
-
 ├── static/
-
 │   ├── index.html      # Frontend markup + CSS
-
 │   └── app.js          # Frontend logic
-
 ├── downloads/          # Download folder (auto-created, git-ignored)
-
 └── README.md
+```
 
 ## 🔍 How It Works
 
