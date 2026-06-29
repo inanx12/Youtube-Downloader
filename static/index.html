@@ -5,387 +5,538 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Downloader</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #000000;
+            --surface: #1c1c1e;
+            --surface-elevated: #2c2c2e;
+            --border: rgba(255,255,255,0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --text-tertiary: #636366;
+            --accent: #0a84ff;
+            --accent-hover: #409cff;
+            --accent-muted: rgba(10,132,255,0.15);
+            --danger: #ff453a;
+            --danger-bg: rgba(255,69,58,0.12);
+            --success: #30d158;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-pill: 100px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
         body {
-            background-color: #0f0f1a;
-            color: #e0e0e0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            padding: 40px 20px;
+            padding: 48px 20px;
         }
 
-        .container {
+        .app {
             width: 100%;
-            max-width: 640px;
-            background: #1a1a2e;
-            border-radius: 16px;
-            padding: 32px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            max-width: 680px;
         }
 
-        h1 {
+        /* ── Header ── */
+        .header {
             text-align: center;
-            margin-bottom: 24px;
-            font-size: 1.5rem;
-            color: #4cc9f0;
-            letter-spacing: 0.5px;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+        }
+        .header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 400;
         }
 
-        .input-group {
+        /* ── URL Input ── */
+        .url-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 6px 6px 6px 20px;
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            transition: border-color var(--transition), box-shadow var(--transition);
         }
-
-        input[type="text"] {
+        .url-card:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-muted);
+        }
+        .url-card svg {
+            flex-shrink: 0;
+            color: var(--text-tertiary);
+            width: 18px;
+            height: 18px;
+        }
+        .url-input {
             flex: 1;
-            padding: 12px 16px;
-            border: 1px solid #2a2a40;
-            border-radius: 10px;
-            background: #0f0f1a;
-            color: #e0e0e0;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus { border-color: #4cc9f0; }
-        input[type="text"]::placeholder { color: #6a6a8a; }
-
-        button {
-            padding: 12px 20px;
+            background: transparent;
             border: none;
-            border-radius: 10px;
-            background: #4cc9f0;
-            color: #0f0f1a;
-            font-size: 1rem;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: inherit;
+            padding: 10px 0;
+        }
+        .url-input::placeholder {
+            color: var(--text-tertiary);
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-pill);
+            padding: 10px 24px;
+            font-size: 14px;
             font-weight: 600;
+            font-family: inherit;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: background var(--transition), transform var(--transition), opacity var(--transition);
             white-space: nowrap;
         }
-
-        button:hover:not(:disabled) { background: #3db8e0; }
-        button:active:not(:disabled) { transform: scale(0.98); }
-        button:disabled {
-            background: #2a2a40;
-            color: #6a6a8a;
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+        .btn-primary:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+        .btn-primary:disabled {
+            opacity: 0.4;
             cursor: not-allowed;
         }
 
-        .btn-secondary {
-            background: #2a2a40;
-            color: #e0e0e0;
+        /* ── Error ── */
+        .error-msg {
+            background: var(--danger-bg);
+            border: 1px solid rgba(255,69,58,0.2);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            color: var(--danger);
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.5;
         }
-        .btn-secondary:hover:not(:disabled) { background: #3a3a50; }
 
-        #videoInfo {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        #thumbnail {
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto 12px;
-            border-radius: 12px;
+        /* ── Single Video Info ── */
+        .video-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            background: #0f0f1a;
+            margin-bottom: 24px;
+            transition: opacity var(--transition-slow), transform var(--transition-slow);
         }
-        #thumbnail img { width: 100%; display: block; }
+        .video-card img {
+            width: 100%;
+            display: block;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+        .video-card .info {
+            padding: 20px;
+        }
+        .video-card .info h2 {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+        .video-card .info p {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
 
-        #title { font-size: 1.1rem; color: #fff; margin-bottom: 4px; }
-        #meta { font-size: 0.85rem; color: #8a8aa8; }
+        /* ── Playlist Info ── */
+        .playlist-header {
+            margin-bottom: 16px;
+        }
+        .playlist-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .playlist-header p {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
 
-        #controls {
+        /* ── Resolution Pills ── */
+        .resolution-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        .pills {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
         }
-
-        select {
-            flex: 1;
-            padding: 12px 16px;
-            border: 1px solid #2a2a40;
-            border-radius: 10px;
-            background: #0f0f1a;
-            color: #e0e0e0;
-            font-size: 1rem;
-            outline: none;
+        .pill {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-pill);
+            padding: 7px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            color: var(--text-secondary);
             cursor: pointer;
+            transition: all var(--transition);
         }
-        select:focus { border-color: #4cc9f0; }
+        .pill:hover:not(.pill-active):not(:disabled) {
+            border-color: var(--text-tertiary);
+            color: var(--text-primary);
+        }
+        .pill-active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+        .pill:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
 
-        #progress { margin-bottom: 20px; }
-
-        .progress-bar {
-            width: 100%;
-            height: 24px;
-            background: #0f0f1a;
-            border-radius: 12px;
+        /* ── Playlist List ── */
+        .list-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            border: 1px solid #2a2a40;
-            margin-bottom: 8px;
+            margin-bottom: 20px;
         }
-
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #4cc9f0, #3a86ff);
-            border-radius: 12px;
-            transition: width 0.3s ease;
-        }
-
-        .progress-info {
+        .list-toolbar {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85rem;
-            color: #8a8aa8;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,0.02);
         }
-
-        #processing {
+        .list-toolbar label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .list-toolbar label input {
+            accent-color: var(--accent);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .list-toolbar .count {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+        }
+        .list-body {
+            max-height: 420px;
+            overflow-y: auto;
+        }
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background var(--transition);
+        }
+        .list-item:last-child { border-bottom: none; }
+        .list-item:hover { background: rgba(255,255,255,0.03); }
+        .list-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .list-item .thumb {
+            width: 88px;
+            height: 50px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+            flex-shrink: 0;
+            background: var(--surface-elevated);
+        }
+        .list-item .thumb-placeholder {
+            width: 88px;
+            height: 50px;
+            border-radius: var(--radius-sm);
+            background: var(--surface-elevated);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            font-size: 0.95rem;
-            color: #8a8aa8;
-            margin-top: 8px;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid #2a2a40;
-            border-top-color: #4cc9f0;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        #result {
-            text-align: center;
-            padding: 16px;
-            background: #0f0f1a;
-            border-radius: 12px;
-            border: 1px solid #2a2a40;
-        }
-
-        #error {
-            padding: 14px 16px;
-            background: #2a0a0a;
-            border: 1px solid #5a1a1a;
-            border-radius: 10px;
-            color: #ff6b6b;
-            font-size: 0.95rem;
-            margin-bottom: 16px;
-            white-space: pre-wrap;
-        }
-
-        /* ── Playlist list ── */
-        #playlistInfo {
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        #playlistInfo h2 {
-            font-size: 1.1rem;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-        #playlistInfo p {
-            font-size: 0.85rem;
-            color: #8a8aa8;
-        }
-
-        .playlist-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 0.85rem;
-            color: #8a8aa8;
-        }
-
-        .playlist-list {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #2a2a40;
-            border-radius: 10px;
-            background: #0f0f1a;
-            margin-bottom: 16px;
-        }
-
-        .playlist-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            border-bottom: 1px solid #1f1f30;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .playlist-row:last-child { border-bottom: none; }
-        .playlist-row:hover { background: #1a1a2e; }
-
-        .playlist-row input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            color: var(--text-tertiary);
+            font-size: 11px;
             flex-shrink: 0;
-            accent-color: #4cc9f0;
-            cursor: pointer;
         }
-
-        .playlist-row img {
-            width: 80px;
-            height: 45px;
-            object-fit: cover;
-            border-radius: 6px;
-            flex-shrink: 0;
-            background: #1a1a2e;
-        }
-
-        .playlist-row .info {
+        .list-item .meta {
             flex: 1;
             min-width: 0;
         }
-
-        .playlist-row .info .row-title {
-            font-size: 0.9rem;
-            color: #e0e0e0;
+        .list-item .meta .title {
+            font-size: 14px;
+            font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: var(--text-primary);
         }
-
-        .playlist-row .info .row-duration {
-            font-size: 0.75rem;
-            color: #6a6a8a;
+        .list-item .meta .dur {
+            font-size: 12px;
+            color: var(--text-tertiary);
             margin-top: 2px;
         }
 
-        /* ── Summary / per-video links ── */
-        .summary {
-            margin-bottom: 16px;
-            text-align: left;
+        /* ── Progress ── */
+        .progress-area {
+            margin-bottom: 24px;
         }
-        .summary h3 {
-            font-size: 1rem;
-            color: #4cc9f0;
-            margin-bottom: 8px;
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background: var(--surface-elevated);
+            border-radius: var(--radius-pill);
+            overflow: hidden;
+            margin-bottom: 12px;
         }
-        .summary p { font-size: 0.9rem; color: #e0e0e0; margin-bottom: 4px; }
-        .summary .failures {
-            font-size: 0.85rem;
-            color: #ff6b6b;
-            margin-top: 8px;
-            padding: 8px 12px;
-            background: #2a0a0a;
-            border-radius: 8px;
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            border-radius: var(--radius-pill);
+            transition: width 0.3s ease;
+        }
+        .progress-bar.processing {
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 50%, var(--accent) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s ease-in-out infinite;
+            width: 100% !important;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            min-height: 22px;
+            margin-bottom: 4px;
+        }
+        .progress-detail {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            min-height: 20px;
         }
 
+        /* ── Result ── */
+        .result-area {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            transition: opacity var(--transition-slow), transform var(--transition-slow);
+        }
+        .result-area h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .result-area .summary-line {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .result-area .failures {
+            margin-top: 12px;
+            background: var(--danger-bg);
+            border: 1px solid rgba(255,69,58,0.15);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--danger);
+            line-height: 1.6;
+        }
+        .result-area .failures div {
+            margin-bottom: 2px;
+        }
+        .result-area .failures div:last-child {
+            margin-bottom: 0;
+        }
+        .result-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn-secondary {
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-pill);
+            padding: 9px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: var(--text-tertiary);
+        }
+        .btn-secondary:active {
+            transform: scale(0.96);
+        }
+
+        /* ── Video links list ── */
         .video-links {
-            text-align: left;
+            margin-top: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
             max-height: 300px;
             overflow-y: auto;
-            border: 1px solid #2a2a40;
-            border-radius: 10px;
-            background: #0f0f1a;
-            margin-bottom: 16px;
         }
-        .video-link-row {
+        .vlink-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px 14px;
-            border-bottom: 1px solid #1f1f30;
-            font-size: 0.85rem;
-            color: #e0e0e0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: background var(--transition);
         }
-        .video-link-row:last-child { border-bottom: none; }
-        .video-link-row button {
-            padding: 6px 12px;
-            font-size: 0.8rem;
+        .vlink-row:last-child { border-bottom: none; }
+        .vlink-row:hover { background: rgba(255,255,255,0.03); }
+        .vlink-row button {
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
         }
 
+        /* ── Utilities ── */
         .hidden { display: none !important; }
+        .fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
-        @media (max-width: 480px) {
-            .container { padding: 20px; }
-            .input-group { flex-direction: column; }
-            #controls { flex-direction: column; }
-            select, button { width: 100%; }
-            .playlist-row img { width: 60px; height: 34px; }
+        @media (max-width: 520px) {
+            body { padding: 24px 16px; }
+            .header h1 { font-size: 24px; }
+            .url-card { padding: 4px 4px 4px 14px; }
+            .btn-primary { padding: 9px 18px; font-size: 13px; }
+            .list-item .thumb, .list-item .thumb-placeholder { width: 72px; height: 40px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>YouTube Downloader</h1>
-
-        <div class="input-group">
-            <input type="text" id="url" placeholder="Paste YouTube URL here…" autocomplete="off">
-            <button id="fetchBtn">Fetch Formats</button>
+    <div class="app">
+        <div class="header">
+            <h1>YouTube Downloader</h1>
+            <p>Download videos and playlists up to 4K</p>
         </div>
 
-        <div id="error" class="hidden"></div>
+        <div id="error" class="hidden error-msg"></div>
 
-        <!-- Single video info -->
-        <div id="videoInfo" class="hidden">
-            <div id="thumbnail"></div>
-            <h2 id="title"></h2>
-            <div id="meta"></div>
+        <div class="url-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="url" class="url-input" placeholder="Paste a YouTube URL…" autocomplete="off">
+            <button id="fetchBtn" class="btn-primary">Fetch</button>
         </div>
 
-        <!-- Playlist info -->
-        <div id="playlistInfo" class="hidden">
-            <h2 id="playlistTitle"></h2>
-            <p id="playlistMeta"></p>
+        <!-- Single video card -->
+        <div id="videoCard" class="hidden video-card">
+            <img id="videoThumb" src="" alt="" onerror="this.style.display='none'">
+            <div class="info">
+                <h2 id="videoTitle">Title</h2>
+                <p id="videoMeta">Meta</p>
+            </div>
         </div>
 
-        <!-- Controls (single video or playlist) -->
-        <div id="controls" class="hidden">
-            <select id="resolution">
-                <option value="">Select resolution…</option>
-            </select>
-            <button id="downloadBtn" disabled>Download</button>
+        <!-- Playlist header -->
+        <div id="playlistHeader" class="hidden playlist-header">
+            <h2 id="playlistTitle">Playlist</h2>
+            <p id="playlistMeta">0 videos</p>
+        </div>
+
+        <!-- Resolution selector -->
+        <div id="resolutionArea" class="hidden">
+            <div class="resolution-label">Quality</div>
+            <div id="resolutionPills" class="pills"></div>
         </div>
 
         <!-- Playlist list -->
-        <div id="playlistControls" class="hidden">
-            <div class="playlist-header">
+        <div id="playlistListCard" class="hidden list-card">
+            <div class="list-toolbar">
                 <label><input type="checkbox" id="selectAll"> Select all</label>
-                <span id="selectedCount">0 selected</span>
+                <span id="selectedCount" class="count">0 selected</span>
             </div>
-            <div class="playlist-list" id="playlistList"></div>
-            <button id="downloadSelectedBtn" disabled>Download Selected</button>
+            <div id="playlistList" class="list-body"></div>
+        </div>
+
+        <!-- Download button (single or playlist) -->
+        <div id="downloadArea" class="hidden" style="margin-bottom: 24px;">
+            <button id="downloadBtn" class="btn-primary" disabled>Download</button>
         </div>
 
         <!-- Progress -->
-        <div id="progress" class="hidden">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
+        <div id="progressArea" class="hidden progress-area">
+            <div class="progress-track">
+                <div id="progressBar" class="progress-bar"></div>
             </div>
-            <div class="progress-info" id="progressInfo"></div>
-            <div id="processing" class="hidden">
-                <div class="spinner"></div>
-                <span>Processing… (converting / merging)</span>
-            </div>
+            <div id="progressText" class="progress-text"></div>
+            <div id="progressDetail" class="progress-detail"></div>
         </div>
 
-        <!-- Results -->
-        <div id="result" class="hidden">
-            <button id="downloadFileBtn">Download File</button>
-            <div id="playlistSummary" class="hidden summary"></div>
+        <!-- Result -->
+        <div id="resultArea" class="hidden result-area">
+            <div id="resultContent"></div>
+            <div id="resultActions" class="result-actions"></div>
             <div id="videoLinks" class="hidden video-links"></div>
-            <button id="downloadZipBtn" class="hidden">Download All (ZIP)</button>
         </div>
     </div>
 
